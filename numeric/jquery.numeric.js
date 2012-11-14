@@ -15,7 +15,7 @@
   *      side-effect: Ctrl+A does not work, though you can still use the mouse to select (or double-click to select all)
  *
  * @name     numeric
- * @param    config      { decimal : "." , negative : true }
+ * @param    config      { decimal : "." , negative : true, max : false }
  * @param    callback     A function that runs if the number is not valid (fires onblur)
  * @author   Sam Collett (http://www.texotela.co.uk)
  * @example  $(".numeric").numeric();
@@ -38,15 +38,17 @@ $.fn.numeric = function(config, callback)
 	var decimal = (config.decimal === false) ? "" : config.decimal || ".";
 	// allow negatives
 	var negative = (config.negative === true) ? true : false;
+	// maximum value
+	var max = (config.max === false) ? false : config.max;
 	// callback function
 	callback = (typeof(callback) == "function" ? callback : function() {});
 	// set data and methods
-	return this.data("numeric.decimal", decimal).data("numeric.negative", negative).data("numeric.callback", callback).keypress($.fn.numeric.keypress).keyup($.fn.numeric.keyup).blur($.fn.numeric.blur);
+	return this.data("numeric.decimal", decimal).data("numeric.negative", negative).data("numeric.max", max).data("numeric.callback", callback).keypress($.fn.numeric.keypress).keyup($.fn.numeric.keyup).blur($.fn.numeric.blur);
 };
 
 $.fn.numeric.keypress = function(e)
 {
-	// get decimal character and determine if negatives are allowed
+	// get decimal character and determine if negatives are allowed, and if there is a maximum allowed value
 	var decimal = $.data(this, "numeric.decimal");
 	var negative = $.data(this, "numeric.negative");
 	// get the key that was pressed
@@ -147,6 +149,7 @@ $.fn.numeric.keyup = function(e)
 		// get decimal character and determine if negatives are allowed
 		var decimal = $.data(this, "numeric.decimal");
 		var negative = $.data(this, "numeric.negative");
+		var max = $.data(this, "numeric.max");
 		
 		// prepend a 0 if necessary
 		if(decimal !== "" && decimal !== null)
@@ -214,6 +217,10 @@ $.fn.numeric.keyup = function(e)
 					val = val.substring(0, k) + val.substring(k + 1);
 				}
 			}
+		}
+		// if the value is above the max allowed, set it to the max
+		if(max && val > max){
+			val = max;
 		}
 		// set the value and prevent the cursor moving to the end
 		this.value = val;
